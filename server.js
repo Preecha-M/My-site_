@@ -1,23 +1,42 @@
-const WebSocket = require('ws');
+const express = require('express');
+const bodyParser = require('body-parser');
+const cors = require('cors');
+const path = require('path');
 
-const server = new WebSocket.Server({ port: 8080 });
+const app = express();
+const port = 8080;
 
-server.on('connection', (socket) => {
-    console.log('New client connected');
+app.use(bodyParser.json());
+app.use(cors());
 
-    socket.on('message', (message) => {
-        console.log(`Received message: ${message}`);
-        // Broadcast message to all clients as a string
-        server.clients.forEach((client) => {
-            if (client.readyState === WebSocket.OPEN) {
-                client.send(message.toString());
-            }
-        });
-    });
+// Serve static HTML
+app.use(express.static(path.join(__dirname, 'public')));
 
-    socket.on('close', () => {
-        console.log('Client disconnected');
-    });
+let messages = []; // Store chat messages
+let clients = []; // Store pending poll requests
+
+app.post('/send', (req, res) => {
+    const { message } = req.body;
+    if (message) {
+        messages.push(message);
+
+        // Notify all waiting clients
+        clients.forEach((client) => client.res.json({ messages: [message] }));
+        clients = []; // Clear the clients list
+    }
+    res.status(200).send('Message received');
 });
 
-console.log('WebSocket server is running on ws://localhost:8080');
+app.get('/poll', (req, res) => {
+    if (messages.length > 0) {
+        const messagesToSend = [...messages];
+        messages = []; // Clear the messages array
+        res.json({ messages: messagesToSend });
+    } else {
+        clients.push({ req, res });
+    }
+});
+
+app.listen(port, () => {
+    console.log(`Server is running on http://localhost:${port}`);
+});
