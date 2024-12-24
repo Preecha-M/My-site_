@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Chat - Christmas Edition</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      background: linear-gradient(to bottom, #2c5364, #0f2027), url('https://i.imgur.com/3nQEjLb.png');
+      background-size: cover;
+      background-repeat: no-repeat;
+      font-family: 'Snowburst One', cursive;
+      color: #fff;
+    }
+    h1 {
+      font-size: 3rem;
+      color: #ffcc00;
+      text-shadow: 2px 2px 5px #000;
+    }
+    button {
+      text-shadow: 1px 1px 2px #000;
+    }
+    .snow {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: -1;
+    }
+    .snowflake {
+      position: absolute;
+      top: -10px;
+      animation: snow 10s linear infinite;
+    }
+    @keyframes snow {
+      0% {
+        transform: translateY(0) rotate(0);
+        opacity: 1;
+      }
+      100% {
+        transform: translateY(100vh) rotate(360deg);
+        opacity: 0;
+      }
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Snowburst+One&display=swap" rel="stylesheet">
+</head>
+<body>
+  <!-- Snowflake Animation -->
+  <div class="snow">
+    <div class="snowflake">❄️</div>
+    <div class="snowflake">❄️</div>
+    <div class="snowflake">❄️</div>
+    <div class="snowflake">❄️</div>
+    <div class="snowflake">❄️</div>
+  </div>
+
+  <div class="text-center">
+    <!-- Header -->
+    <h1 class="mb-6">🎄 Merry Christmas! 🎁</h1>
+
+    <img src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExZXR4Ym9nc3lweWhuNDFpbmw0d2tseHVkOWdzaTNnZnNncjh3aHh6NCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/MDJ9IbxxvDUQM/giphy.gif"
+      alt="Centered Photo" class="mx-auto mb-6 rounded-lg shadow-lg">
+
+    <!-- Chat Box -->
+    <div id="chat-box" class="w-full p-4 mb-6 bg-white border rounded-lg max-w-md h-64 overflow-y-scroll text-gray-700">
+      <!-- Messages will appear here -->
+    </div>
+
+    <!-- Text Input -->
+    <textarea id="user-message" rows="3" placeholder="พิมพ์ข้อความตรงนี้ค้าบบบบ... 🎅"
+      class="w-full p-2 border rounded-lg text-gray-900"></textarea>
+    <button id="send-message" class="mt-4 px-6 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600">
+      ส่งเลยยยยย 🎁
+    </button>
+
+    <!-- Instruction Text -->
+    <div class="mt-6 text-lg font-bold text-white">
+      ยิ้มหน่อยค้าบบบบ 😊
+    </div>
+
+    <!-- Yes and No Buttons -->
+    <div class="mt-4">
+      <button id="yes-button" class="px-6 py-2 text-white bg-green-500 rounded-lg hover:bg-green-600">
+        ได้เลยยย 🌟
+      </button>
+      <button id="no-button" class="px-6 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600">
+        ม่ายยยย ❌
+      </button>
+    </div>
+
+    <!-- Status Display -->
+    <div id="status" class="mt-4 text-lg font-bold"></div>
+
+    <!-- Clear Storage Button -->
+    <div class="mt-6">
+      <button id="clear-storage" class="px-6 py-2 text-white bg-red-500 rounded-lg hover:bg-red-600">
+        Clear Chat & Status 🎄
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // Add Snowflake Animations
+    function generateSnowflakes() {
+      const snowContainer = document.querySelector('.snow');
+      for (let i = 0; i < 50; i++) {
+        const snowflake = document.createElement('div');
+        snowflake.className = 'snowflake';
+        snowflake.style.left = Math.random() * 100 + 'vw';
+        snowflake.style.animationDuration = Math.random() * 3 + 7 + 's';
+        snowflake.style.fontSize = Math.random() * 10 + 10 + 'px';
+        snowContainer.appendChild(snowflake);
+      }
+    }
+    generateSnowflakes();
+
+    // Connect to WebSocket server and other functionality
+    const socket = new WebSocket('ws://localhost:8080');
+    const chatBox = document.getElementById('chat-box');
+    const messageInput = document.getElementById('user-message');
+    const sendMessageButton = document.getElementById('send-message');
+    const yesButton = document.getElementById('yes-button');
+    const noButton = document.getElementById('no-button');
+    const clearStorageButton = document.getElementById('clear-storage');
+    const statusDisplay = document.getElementById('status');
+
+    const CLEAR_PASSWORD = "admin123";
+
+    // Handle other button interactions
+    sendMessageButton.addEventListener('click', () => {
+      const message = messageInput.value;
+      if (message) {
+        socket.send(message);
+        messageInput.value = '';
+      }
+    });
+
+    yesButton.addEventListener('click', () => {
+      const status = "ได้เลยยย 🌟";
+      statusDisplay.textContent = status;
+      statusDisplay.classList.add('text-green-500');
+      localStorage.setItem('status', status);
+    });
+
+    noButton.addEventListener('click', () => {
+      const randomX = Math.floor(Math.random() * (window.innerWidth - noButton.offsetWidth));
+      const randomY = Math.floor(Math.random() * (window.innerHeight - noButton.offsetHeight));
+      noButton.style.position = 'absolute';
+      noButton.style.left = `${randomX}px`;
+      noButton.style.top = `${randomY}px`;
+    });
+
+    clearStorageButton.addEventListener('click', () => {
+      const password = prompt("Enter the password to clear chat and status:");
+      if (password === CLEAR_PASSWORD) {
+        localStorage.clear();
+        chatBox.innerHTML = '';
+        statusDisplay.textContent = '';
+        alert("Chat and status have been cleared!");
+      } else {
+        alert("Incorrect password. Action canceled.");
+      }
+    });
+  </script>
+</body>
+</html>
