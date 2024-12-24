@@ -7,7 +7,12 @@ const app = express();
 const port = 8080;
 
 app.use(bodyParser.json());
-app.use(cors());
+app.use(cors({
+    origin: '*', // หรือใส่โดเมนเฉพาะที่ใช้ เช่น 'https://your-railway-domain.app'
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+}));
+
 
 // Serve static HTML
 app.use(express.static(path.join(__dirname, 'public')));
@@ -28,14 +33,17 @@ app.post('/send', (req, res) => {
 });
 
 app.get('/poll', (req, res) => {
-    if (messages.length > 0) {
-        const messagesToSend = [...messages];
-        messages = []; // Clear the messages array
-        res.json({ messages: messagesToSend });
-    } else {
-        clients.push({ req, res });
-    }
+    const timeout = setTimeout(() => {
+        res.json({ messages: [] }); // ส่งข้อความว่างกลับหากไม่มีข้อความใหม่
+    }, 25000); // 25 วินาที
+
+    clients.push({
+        req,
+        res,
+        timeout,
+    });
 });
+
 
 app.listen(port, () => {
     console.log(`Server is running on http://localhost:${port}`);
