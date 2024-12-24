@@ -112,13 +112,12 @@
       function displayMessage(message) {
         if (!displayedMessages.has(message)) {
           displayedMessages.add(message);
-
+      
           const messageDiv = document.createElement("div");
           messageDiv.textContent = message;
           messageDiv.className = "p-2 mb-2 bg-gray-200 rounded-lg text-left";
           chatBox.appendChild(messageDiv);
-          chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll to the latest message
-
+          chatBox.scrollTop = chatBox.scrollHeight; // Auto-scroll
           // Save message to localStorage
           saveMessagesToLocalStorage(message);
         }
@@ -145,9 +144,7 @@
       // Function to poll for new messages
       async function pollMessages() {
         try {
-          const response = await fetch(
-            "https://my-site-production-9081.up.railway.app/poll"
-          );
+          const response = await fetch("https://my-site-production-9081.up.railway.app/poll");
           const data = await response.json();
           if (data.messages && data.messages.length > 0) {
             data.messages.forEach((msg) => displayMessage(msg));
@@ -155,9 +152,10 @@
         } catch (error) {
           console.error("Error polling messages:", error);
         } finally {
-          setTimeout(pollMessages, 1000);
+          setTimeout(pollMessages, 1000); // Poll อีกครั้งทุก 1 วินาที
         }
       }
+      
 
       // Event listener for send button
       sendMessageButton.addEventListener("click", sendMessage);

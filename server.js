@@ -8,10 +8,12 @@ const port = 8080;
 
 app.use(bodyParser.json());
 app.use(cors({
-    origin: ['https://my-site-production-9081.up.railway.app'], // ระบุโดเมน
+    origin: ['https://my-site-production-9081.up.railway.app', 'http://127.0.0.1:5500'], // เพิ่ม 127.0.0.1
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));
+
+
 
 
 
@@ -33,10 +35,11 @@ app.post('/send', (req, res) => {
     res.status(200).send('Message received');
 });
 
+
 app.get('/poll', (req, res) => {
     const timeout = setTimeout(() => {
-        res.json({ messages: [] }); // ส่งข้อความว่างกลับหากไม่มีข้อความใหม่
-    }, 25000); // 25 วินาที
+        res.json({ messages: [] }); // ส่งข้อความว่างถ้าไม่มีข้อความใหม่
+    }, 25000);
 
     clients.push({
         req,
@@ -44,6 +47,7 @@ app.get('/poll', (req, res) => {
         timeout,
     });
 });
+
 
 
 app.listen(port, () => {
