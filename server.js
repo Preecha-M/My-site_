@@ -8,10 +8,11 @@ const port = 8080;
 
 app.use(bodyParser.json());
 app.use(cors({
-    origin: '*', // หรือใส่โดเมนเฉพาะที่ใช้ เช่น 'https://your-railway-domain.app'
+    origin: ['https://my-site-production-9081.up.railway.app'], // ระบุโดเมน
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
 }));
+
 
 
 // Serve static HTML
